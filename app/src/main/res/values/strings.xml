@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">CurrencyExchange</string>
+    <string name="error_loading_rates">Error loading exchange rates</string>
+    <string name="retry">Retry</string>
+    <string name="liveExchangeRate">Live Exchange Rate</string>
+    <string name="footer">Footer</string>
+
+
+
+</resources>
