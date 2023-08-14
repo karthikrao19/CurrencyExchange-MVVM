@@ -33,7 +33,7 @@ class CurrencyConverterRepositoryTest {
 
 
     @Test
-    suspend fun `should call get currency rates and save to map`() {
+     fun `should call get currency rates and save to map`() {
         coEvery { service.getOpenExchangeRate(apiKey = BuildConfig.TMDB_API_KEY) }
             .returns(Response.success(TestData.currencyRatesResponse))
 
@@ -44,7 +44,9 @@ class CurrencyConverterRepositoryTest {
         coVerify(exactly = 1) {
             service.getOpenExchangeRate(apiKey = BuildConfig.TMDB_API_KEY)
         }
-        assertEquals(repo.getCurrency(), TestData.currencyRatesResponse.rates)
+        runBlocking {
+            assertEquals(repo.getCurrentExchangeRate(), TestData.currencyRatesResponse.rates)
+        }
     }
 
     @Test

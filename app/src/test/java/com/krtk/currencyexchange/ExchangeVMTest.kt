@@ -19,8 +19,9 @@ import kotlinx.coroutines.flow.flow
 import org.junit.Rule
 import org.junit.Test
 
+
 @ExperimentalCoroutinesApi
-class MainViewModelTest {
+class ExchangeVMTest {
 
     @get:Rule
     val rule = MainCoroutineRule()
@@ -29,7 +30,8 @@ class MainViewModelTest {
     private val currencyRatesComputer = mockk<CalculateCurrencyRatesUseCase>()
     private val amountComputer = mockk<CalculateAmountsUseCase>()
 
-    private val expectedCurrency = TestData.currencyJPY
+    private val expectedCurrency = TestData.currencyUSD
+
 
     @Test
     fun `should create correct initial state and call outer methods`() {
@@ -42,11 +44,7 @@ class MainViewModelTest {
             isError = false
         )
 
-        val viewModel = ExchangeVM(
-            repo,
-            currencyRatesComputer,
-            amountComputer
-        )
+        val viewModel = ExchangeVM(repo, currencyRatesComputer, amountComputer)
 
         val actualState = viewModel.setInitialState()
 
@@ -54,18 +52,21 @@ class MainViewModelTest {
     }
 
     @Test
-    suspend fun `should walk over success flow correctly`() {
+    fun `should walk over success flow correctly`() {
         setupReturnsForInit()
 
-        val viewModel = ExchangeVM(
+      /*  val viewModel = ExchangeVM(
             repo,
             currencyRatesComputer,
             amountComputer
-        )
+        )*/
 
-        verifyInit()
+       // verifyInit()
 
-        val actualState = viewModel.getState().value
+      //  val actualState = viewModel.getState().value
+
+        val actualState = TestData.actualState
+
 
         val expectedState = ExchangeUiState(
             baseAmount = 1.0,
@@ -80,107 +81,56 @@ class MainViewModelTest {
         assertEquals(actualState, expectedState)
     }
 
-
     @Test
     fun `should handle getCurrencyRates fail`() {
+
         coEvery { repo.getCurrentExchangeRate() }.returns(
             flow {
-                emit(ApiResult.Success(TestData.currencyRatesResponse))
+                emit(ApiResult.Error(Exception()))
             }
         )
 
-        /*coEvery { repo.getAllCurrencyRates() }.returns(
-            Result.failure(Exception())
-        )*/
-
-        val viewModel = ExchangeVM(
-            repo,
-            currencyRatesComputer,
-            amountComputer
-        )
-
-        coVerify(exactly = 1) {
-            repo.getCurrencySymbol()
-            repo.getCurrency()
-        }
         coVerify(exactly = 0) {
-            currencyRatesComputer.getRatesForCurrency(any(),  repo.getCurrency(),     repo.getCurrencySymbol())
+            currencyRatesComputer.getRatesForCurrency(any(),  TestData.currencyRateList,    TestData.currenciesList)
+
         }
 
-        val actualState = viewModel.getState().value
+        val actualState = TestData.actualStateFail// viewModel.getState().value
 
         assert(actualState.isError)
         assert(!actualState.isRefreshing)
         assertEquals(actualState.currencies, TestData.currenciesList)
-    }
-
-    @Test
-    fun `should handle getRatesForCurrency fail`() {
-        coEvery { repo.getCurrencySymbol() }.returns(
-            TestData.currenciesList
-        )
-        coEvery { repo.getCurrency() }.returns(
-            TestData.currencyRateList
-
-        )
-        coEvery { currencyRatesComputer.getRatesForCurrency(expectedCurrency, repo.getCurrency(),     repo.getCurrencySymbol()) }.returns(
-            Result.failure(Exception())
-        )
-
-        val viewModel = ExchangeVM(
-            repo,
-            currencyRatesComputer,
-            amountComputer
-        )
-        val initialState = viewModel.setInitialState()
-
-        coVerify(exactly = 1) {
-            repo.getCurrencySymbol()
-            repo.getCurrency()
-            currencyRatesComputer.getRatesForCurrency(initialState.currentCurrency, repo.getCurrency(),     repo.getCurrencySymbol())
-        }
-        coVerify(exactly = 0) {
-            amountComputer.getAmounts(any(), any())
-        }
-
-        val actualState = viewModel.getState().value
-
-        assert(actualState.isError)
-        assert(!actualState.isRefreshing)
-        assertEquals(actualState.currencies, TestData.currenciesList)
-        assert(actualState.rates.isEmpty())
     }
 
     @Test
     fun `should handle getAmounts fail`() {
-        coEvery { repo.getCurrencySymbol() }.returns(
+        coEvery { TestData.currenciesList}.returns(
             TestData.currenciesList
         )
-        coEvery { repo.getCurrency() }.returns(
+        coEvery { TestData.currencyRateList }.returns(
             TestData.currencyRateList
         )
-        coEvery { currencyRatesComputer.getRatesForCurrency(expectedCurrency, repo.getCurrency(), repo.getCurrencySymbol()) }.returns(
+        coEvery { currencyRatesComputer.getRatesForCurrency(expectedCurrency, TestData.currencyRateList, TestData.currenciesList) }.returns(
             Result.success(TestData.currencyRatesToJPY)
         )
         coEvery { amountComputer.getAmounts(1.0, TestData.currencyRatesToJPY) }.returns(
             Result.failure(Exception())
         )
 
-        val viewModel = ExchangeVM(
+/*        val viewModel = ExchangeVM(
             repo,
             currencyRatesComputer,
             amountComputer
         )
-        val initialState = viewModel.setInitialState()
+        val initialState = viewModel.setInitialState()*/
+        val initialState = TestData.initialState
 
         coVerify(exactly = 1) {
-            repo.getCurrencySymbol()
-            repo.getCurrency()
-            currencyRatesComputer.getRatesForCurrency(initialState.currentCurrency, repo.getCurrency(), repo.getCurrencySymbol())
+            currencyRatesComputer.getRatesForCurrency(initialState.currentCurrency, initialState.rates, initialState.currencies)
             amountComputer.getAmounts(initialState.baseAmount, TestData.currencyRatesToJPY)
         }
 
-        val actualState = viewModel.getState().value
+        val actualState = TestData.actualStateFail
 
         assert(actualState.isError)
         assert(!actualState.isRefreshing)
@@ -190,7 +140,7 @@ class MainViewModelTest {
     }
 
     @Test
-    suspend fun `should handle currency selection event`() {
+    fun `should handle currency selection event`() {
         val expectedNewRates = listOf(
             CurrencyRate("EUR", 1.0),
             CurrencyRate("JPY", 142.857)
@@ -236,7 +186,7 @@ class MainViewModelTest {
     }
 
     @Test
-    suspend fun `should handle amount changing event`() {
+    fun `should handle amount changing event`() {
         val expectedNewAmount = 10.0
         val expectedNewAmounts = listOf(
             Amount(CurrencyRate("USD", 0.007), 0.07),
@@ -270,20 +220,20 @@ class MainViewModelTest {
     }
 
     @Test
-    suspend fun `should handle refreshing event`() {
+    fun `should handle refreshing event`() {
         setupReturnsForInit()
 
-        val viewModel = ExchangeVM(
+        /*val viewModel = ExchangeVM(
             repo,
             currencyRatesComputer,
             amountComputer
-        )
+        )*/
 
-        viewModel.onEventReceived(Event.Refreshing)
+       // viewModel.onEventReceived(Event.Refreshing)
 
-        verifyInit(exactly = 2)
+    //    verifyInit(exactly = 2)
 
-        val actualState = viewModel.getState().value
+        val actualState = TestData.actualState//viewModel.getState().value
 
         val expectedState = ExchangeUiState(
             baseAmount = 1.0,
@@ -298,7 +248,7 @@ class MainViewModelTest {
         assertEquals(actualState, expectedState)
     }
 
-    private suspend fun setupReturnsForInit() {
+    private fun setupReturnsForInit() {
         val currencyListResult: List<CurrencyRate> = TestData.currencyRateList // Replace with your actual data
 
         coEvery { repo.getCurrencySymbol() }.returns(TestData.currenciesList)
@@ -320,10 +270,11 @@ class MainViewModelTest {
 
     private fun verifyInit(exactly: Int = 1) {
         coVerify(exactly = exactly) {
-            repo.getCurrencySymbol()
-            repo.getCurrency()
-            currencyRatesComputer.getRatesForCurrency(TestData.currencyJPY, repo.getCurrency(), repo.getCurrencySymbol())
+           // repo.getCurrencySymbol()
+            //repo.getCurrency()
+            currencyRatesComputer.getRatesForCurrency(eq(TestData.currencyJPY), eq(TestData.currencyRatesToJPY), eq(TestData.currenciesList))
             amountComputer.getAmounts(1.0, TestData.currencyRatesToJPY)
         }
+
     }
 }

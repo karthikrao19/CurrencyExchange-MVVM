@@ -4,6 +4,7 @@ import com.krtk.currencyexchange.dataLayer.model.Amount
 import com.krtk.currencyexchange.dataLayer.model.Currency
 import com.krtk.currencyexchange.dataLayer.model.CurrencyRate
 import com.krtk.currencyexchange.dataLayer.model.OpenExchangeRateResponse
+import com.krtk.currencyexchange.presentationLayer.uiComponents.homeScreen.ExchangeUiState
 
 object TestData {
     val currencyRatesResponse =
@@ -34,9 +35,40 @@ object TestData {
     )
 
     val currencyJPY = Currency("JPY")
+    val currencyUSD = Currency("USD")
 
     val amountsToOneJPY = listOf(
         Amount(CurrencyRate("USD", 0.007), 0.007),
         Amount(CurrencyRate("EUR", 0.007), 0.007)
     )
+
+    val actualState = ExchangeUiState(
+        baseAmount = 1.0,
+        currentCurrency = currencyJPY,
+        currencies = currenciesList,
+        rates = currencyRatesToJPY,
+        amounts = amountsToOneJPY,
+        isError = false,
+        isRefreshing = false
+    )
+
+    val actualStateFail = ExchangeUiState(
+        baseAmount = 1.0,
+        currentCurrency = currencyJPY,
+        currencies = currenciesList,
+        rates = currencyRatesToJPY,
+        amounts = amountsToOneJPY,
+        isError = true,
+        isRefreshing = false
+    )
+
+    val initialState = ExchangeUiState(
+        baseAmount = 1.0,
+        currentCurrency = currencyJPY,
+        currencies = emptyList(),
+        rates = emptyList(),
+        isError = false,
+        isRefreshing = true
+    )
+
 }

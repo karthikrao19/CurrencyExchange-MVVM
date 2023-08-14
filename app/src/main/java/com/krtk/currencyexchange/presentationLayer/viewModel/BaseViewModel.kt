@@ -1,6 +1,5 @@
 package com.krtk.currencyexchange.presentationLayer.viewModel
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -28,7 +27,6 @@ abstract class BaseViewModel<
     abstract fun onEventReceived(event: Event)
 
     private val initialState: UiState by lazy {
-        Log.i("initialState", "******initialState*************")
         setInitialState()
     }
 

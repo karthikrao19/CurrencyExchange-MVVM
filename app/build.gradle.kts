@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.fir.expressions.FirEmptyArgumentList.arguments
-import org.jetbrains.kotlin.fir.resolve.calls.ResolvedCallArgument.DefaultArgument.arguments
+import java.util.Properties
+
 
 plugins {
     id("com.android.application")
@@ -37,16 +37,18 @@ android {
             }
         }*/
 
+
+
         vectorDrawables {
             useSupportLibrary = true
         }
 
-       //Properties properties = new Properties()
-       // properties.load(project.rootProject.file("local.properties").newDataInputStream())
-       // buildConfigField "String", "TMDB_API_KEY", properties.getProperty("TMDB_API_KEY", "")
-       // buildConfigField "String", "TMDB_API_KEY", providers.
-      //  val properties =  Properties
-        buildConfigField("String", "TMDB_API_KEY", "\"b96fea102cf04451b74519758d79cfd4\"")
+
+       // buildConfigField("String", "TMDB_API_KEY", "\"b96fea102cf04451b74519758d79cfd4\"")
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        buildConfigField("String", "TMDB_API_KEY", "\"${properties.getProperty("TMDB_API_KEY")}\"")
+
     }
 
     buildTypes {
@@ -96,6 +98,9 @@ dependencies {
 
     testImplementation ("io.mockk:mockk:1.12.4")
     testImplementation("junit:junit:4.13.2")
+
+   // testImplementation ("org.mockito:mockito-core:5.1.1")
+    //testImplementation ("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.3")
 
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
