@@ -1,6 +1,5 @@
 package com.krtk.currencyexchange.domainLayer
 
-import android.util.Log
 import com.krtk.currencyexchange.R
 import com.krtk.currencyexchange.common.ApiResult
 import com.krtk.currencyexchange.common.Utils
@@ -25,23 +24,27 @@ interface ExchangeRepository {
         get() = MutableStateFlow(ExchangeUiState(loading = true))
 
 
-
+    //To insert Currency to DB
     suspend fun insertCurrency(rate: List<CurrencyRate>) {
         roomDao.insertCurrency(rate)
     }
 
+    //To insert Timestamp to DB
     suspend fun insertTimeStamp(timeStamp: TimeStamp) {
         roomDao.insertTimeStamp(timeStamp)
     }
 
+    //To fetch CurrencyRate from DB
     suspend fun getCurrency() : List<CurrencyRate> {
         return  roomDao.getCurrentExchangeRatesDB()
     }
 
+    //To fetch Currency Symbol from DB
     suspend fun getCurrencySymbol() : List<Currency> {
         return  roomDao.getCurrentExchangeSymbol()
     }
 
+    //To fetch TimeStamp from DB
     suspend fun getTimeStamp() : TimeStamp{
         return  roomDao.getTimeStamp()
     }
@@ -49,7 +52,8 @@ interface ExchangeRepository {
 
     suspend fun getCurrentExchangeRate(): Flow<ApiResult<OpenExchangeRateResponse>>
 
-
+    //The getExchangeRate function appears to be responsible for fetching currency exchange rates
+    // from an API and updating the data in a database.
     suspend fun getExchangeRate() {
 
         getCurrentExchangeRate().collect { response ->

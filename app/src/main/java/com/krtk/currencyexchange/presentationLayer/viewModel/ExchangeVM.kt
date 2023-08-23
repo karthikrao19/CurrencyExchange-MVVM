@@ -34,10 +34,6 @@ class ExchangeVM @Inject constructor(
 
     private val _uiState = MutableStateFlow(ExchangeUiState(loading = true))
     val uiState: StateFlow<ExchangeUiState> = _uiState.asStateFlow()
-    private lateinit var countDownTimer: CountDownTimer
-    private val _remainingTime = MutableStateFlow(0L)
-    val remainingTime: StateFlow<Long>
-        get() = _remainingTime
 
 
     init {
@@ -46,6 +42,8 @@ class ExchangeVM @Inject constructor(
         getExchangeRateServerOrDB()
     }
 
+    //it appears to be responsible for fetching currency exchange rates from either a server or a local database,
+    // updating the UI state accordingly, and triggering further operations like fetching equivalent amounts.
     private fun getExchangeRateServerOrDB() {
         viewModelScope.launch {
             val currencyRateList = exchangeRepository.getCurrency()
@@ -55,7 +53,7 @@ class ExchangeVM @Inject constructor(
                     exchangeRepository.getExchangeRate()
                 }
             } catch (e : Exception){
-                val list  = exchangeRepository.getExchangeRate()
+                e.printStackTrace()
             }
 
 
@@ -80,6 +78,8 @@ class ExchangeVM @Inject constructor(
         }
     }
 
+    //The onEventReceived function seems to be an event handler that responds to different events by updating
+    // the UI state and triggering various actions in your ViewModel.
     override fun onEventReceived(event: Event) {
         //Log.i("onEventReceived", "onEventReceived*******" + _uiState.value.isRefreshing)
         when (event) {
@@ -101,7 +101,6 @@ class ExchangeVM @Inject constructor(
                 //Log.i("onEventReceived", "Event.Refreshing*******" +  _uiState.value.currentCurrency)
             }
 
-            else -> {}
         }
     }
 
@@ -118,6 +117,8 @@ class ExchangeVM @Inject constructor(
         }
     }
 
+    // It appears to be responsible for updating the base currency amount, triggering updates based
+    // on the new amount, and fetching the equivalent amounts in different target currencies.
     private fun setNewAmount(amount: Double) {
         viewModelScope.launch {
             listIsEmptyUpdateFromDB()
@@ -127,7 +128,8 @@ class ExchangeVM @Inject constructor(
     }
 
 
-
+    //It appears to be responsible for updating the selected currency, triggering updates based on
+    // the new currency selection, and fetching the currency exchange rates.
     private fun setNewCurrency(currency: Currency) {
         _uiState.value.currentCurrency = currency
         viewModelScope.launch {

@@ -223,16 +223,6 @@ class ExchangeVMTest {
     fun `should handle refreshing event`() {
         setupReturnsForInit()
 
-        /*val viewModel = ExchangeVM(
-            repo,
-            currencyRatesComputer,
-            amountComputer
-        )*/
-
-       // viewModel.onEventReceived(Event.Refreshing)
-
-    //    verifyInit(exactly = 2)
-
         val actualState = TestData.actualState//viewModel.getState().value
 
         val expectedState = ExchangeUiState(

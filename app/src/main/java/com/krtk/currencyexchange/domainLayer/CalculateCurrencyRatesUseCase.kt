@@ -14,6 +14,8 @@ class CalculateCurrencyRatesUseCase
         private val exception = IllegalStateException("Has not enough data to compute rates")
     }
 
+    //The getRatesForCurrency function appears to be responsible for calculating currency exchange rates for
+    // a specific target currency in comparison to a list of other currencies.
     suspend fun getRatesForCurrency(
         currency: Currency,
         rates: List<CurrencyRate>,
@@ -26,6 +28,8 @@ class CalculateCurrencyRatesUseCase
         }
     }
 
+    //The computeCurrencyRates function to be responsible for calculating currency exchange rates
+    // relative to a specific target currency, using precomputed dollar value conversions.
     private fun computeCurrencyRates(
         dollarValueMap: Map<String, Double>,
         availableCurrencies: List<Currency>,
